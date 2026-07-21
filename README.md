@@ -55,11 +55,9 @@ Conditional syntax is selected at compile time. With `ngx_condition_module`, pla
 
 **Syntax:** *log_var_set $variable value;*
 
-**Legacy syntax (without ngx_condition_module):** *log_var_set $variable value [if=condition | if!=condition];*
-
 **Default:** *-*
 
-**Context:** *stream, server; stream when, server when (with ngx_condition_module)*
+**Context:** *stream, server, stream when, server when*
 
 Sets the variable to the given value before access log writing. The value may contain variables. These directives are inherited from the previous configuration level only when there is no directive for the same variable defined at the current level.
 
