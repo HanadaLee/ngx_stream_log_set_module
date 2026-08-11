@@ -57,7 +57,7 @@ Conditional syntax is selected at compile time. With `ngx_condition_module`, pla
 
 **Default:** *-*
 
-**Context:** *stream, server, stream when, server when*
+**Context:** *stream, server, when*
 
 Sets the variable to the given value before access log writing. The value may contain variables. These directives are inherited from the previous configuration level only when there is no directive for the same variable defined at the current level.
 

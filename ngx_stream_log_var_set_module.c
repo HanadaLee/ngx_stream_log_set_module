@@ -32,7 +32,7 @@ typedef struct {
 
 
 static ngx_int_t ngx_stream_log_var_set_handler(ngx_stream_session_t *s);
-static char * ngx_stream_log_var_set(ngx_conf_t *cf, ngx_command_t *cmd,
+static char *ngx_stream_log_var_set(ngx_conf_t *cf, ngx_command_t *cmd,
     void *conf);
 static ngx_int_t ngx_stream_log_var_set_variable(ngx_stream_session_t *s,
     ngx_stream_variable_value_t *v, uintptr_t data);
@@ -201,8 +201,8 @@ ngx_stream_log_var_set(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     value[1].data++;
 
     if (lscf->vars == NGX_CONF_UNSET_PTR) {
-        lscf->vars = ngx_array_create(cf->pool, 1,
-                                      sizeof(ngx_stream_log_var_set_variable_t));
+        lscf->vars = ngx_array_create(
+            cf->pool, 1, sizeof(ngx_stream_log_var_set_variable_t));
         if (lscf->vars == NULL) {
             return NGX_CONF_ERROR;
         }
@@ -259,7 +259,7 @@ ngx_stream_log_var_set(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
         } else {
             ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                "invalid parameter \"%V\"", &value[3]);
+                               "invalid parameter \"%V\"", &value[3]);
             return NGX_CONF_ERROR;
         }
 
