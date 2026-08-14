@@ -23,28 +23,28 @@ typedef struct {
     ngx_stream_complex_value_t  *filter;
     ngx_int_t                    negative;
 #endif
-} ngx_stream_log_var_set_variable_t;
+} ngx_stream_log_set_variable_t;
 
 
 typedef struct {
     ngx_array_t                 *vars;
-} ngx_stream_log_var_set_srv_conf_t;
+} ngx_stream_log_set_srv_conf_t;
 
 
-static ngx_int_t ngx_stream_log_var_set_handler(ngx_stream_session_t *s);
-static char *ngx_stream_log_var_set(ngx_conf_t *cf, ngx_command_t *cmd,
+static ngx_int_t ngx_stream_log_set_handler(ngx_stream_session_t *s);
+static char *ngx_stream_log_set(ngx_conf_t *cf, ngx_command_t *cmd,
     void *conf);
-static ngx_int_t ngx_stream_log_var_set_variable(ngx_stream_session_t *s,
+static ngx_int_t ngx_stream_log_set_variable(ngx_stream_session_t *s,
     ngx_stream_variable_value_t *v, uintptr_t data);
-static void *ngx_stream_log_var_set_create_srv_conf(ngx_conf_t *cf);
-static char *ngx_stream_log_var_set_merge_srv_conf(ngx_conf_t *cf,
-    void *parent, void *child);
-static ngx_int_t ngx_stream_log_var_set_init(ngx_conf_t *cf);
+static void *ngx_stream_log_set_create_srv_conf(ngx_conf_t *cf);
+static char *ngx_stream_log_set_merge_srv_conf(ngx_conf_t *cf, void *parent,
+    void *child);
+static ngx_int_t ngx_stream_log_set_init(ngx_conf_t *cf);
 
 
-static ngx_command_t  ngx_stream_log_var_set_commands[] = {
+static ngx_command_t  ngx_stream_log_set_commands[] = {
 
-    { ngx_string("log_var_set"),
+    { ngx_string("log_set"),
       NGX_STREAM_MAIN_CONF|NGX_STREAM_SRV_CONF
 #if (NGX_CONDITION)
                            |NGX_STREAM_MAIN_WHEN_CONF
@@ -52,7 +52,7 @@ static ngx_command_t  ngx_stream_log_var_set_commands[] = {
 #else
                            |NGX_CONF_TAKE23,
 #endif
-      ngx_stream_log_var_set,
+      ngx_stream_log_set,
       NGX_STREAM_SRV_CONF_OFFSET,
       0,
       NULL },
@@ -61,22 +61,22 @@ static ngx_command_t  ngx_stream_log_var_set_commands[] = {
 };
 
 
-static ngx_stream_module_t  ngx_stream_log_var_set_module_ctx = {
+static ngx_stream_module_t  ngx_stream_log_set_module_ctx = {
     NULL,                                   /* preconfiguration */
-    ngx_stream_log_var_set_init,            /* postconfiguration */
+    ngx_stream_log_set_init,                /* postconfiguration */
 
     NULL,                                   /* create main conf */
     NULL,                                   /* init main conf */
 
-    ngx_stream_log_var_set_create_srv_conf, /* create srv conf */
-    ngx_stream_log_var_set_merge_srv_conf   /* merge srv conf */
+    ngx_stream_log_set_create_srv_conf,     /* create srv conf */
+    ngx_stream_log_set_merge_srv_conf       /* merge srv conf */
 };
 
 
-ngx_module_t  ngx_stream_log_var_set_module = {
+ngx_module_t  ngx_stream_log_set_module = {
     NGX_MODULE_V1,
-    &ngx_stream_log_var_set_module_ctx,     /* module context */
-    ngx_stream_log_var_set_commands,        /* module directives */
+    &ngx_stream_log_set_module_ctx,         /* module context */
+    ngx_stream_log_set_commands,            /* module directives */
     NGX_STREAM_MODULE,                      /* module type */
     NULL,                                   /* init master */
     NULL,                                   /* init module */
@@ -90,19 +90,19 @@ ngx_module_t  ngx_stream_log_var_set_module = {
 
 
 static ngx_int_t
-ngx_stream_log_var_set_handler(ngx_stream_session_t *s)
+ngx_stream_log_set_handler(ngx_stream_session_t *s)
 {
     ngx_str_t                            val;
     ngx_stream_variable_t               *v;
     ngx_stream_variable_value_t         *vv;
-    ngx_stream_log_var_set_srv_conf_t   *lscf;
-    ngx_stream_log_var_set_variable_t   *lv, *last;
+    ngx_stream_log_set_srv_conf_t       *lscf;
+    ngx_stream_log_set_variable_t       *lv, *last;
     ngx_stream_core_main_conf_t         *cmcf;
 
     ngx_log_debug0(NGX_LOG_DEBUG_STREAM, s->connection->log, 0,
                    "log var set handler");
 
-    lscf = ngx_stream_get_module_srv_conf(s, ngx_stream_log_var_set_module);
+    lscf = ngx_stream_get_module_srv_conf(s, ngx_stream_log_set_module);
 
     if (lscf->vars == NULL) {
         return NGX_OK;
@@ -179,13 +179,13 @@ ngx_stream_log_var_set_handler(ngx_stream_session_t *s)
 
 
 static char *
-ngx_stream_log_var_set(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
+ngx_stream_log_set(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 {
-    ngx_stream_log_var_set_srv_conf_t  *lscf = conf;
+    ngx_stream_log_set_srv_conf_t  *lscf = conf;
 
     ngx_str_t                           *value;
     ngx_stream_variable_t               *v;
-    ngx_stream_log_var_set_variable_t   *lv;
+    ngx_stream_log_set_variable_t       *lv;
     ngx_str_t                            s;
     ngx_stream_compile_complex_value_t   ccv;
 
@@ -201,8 +201,8 @@ ngx_stream_log_var_set(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     value[1].data++;
 
     if (lscf->vars == NGX_CONF_UNSET_PTR) {
-        lscf->vars = ngx_array_create(
-            cf->pool, 1, sizeof(ngx_stream_log_var_set_variable_t));
+        lscf->vars = ngx_array_create(cf->pool, 1,
+                                      sizeof(ngx_stream_log_set_variable_t));
         if (lscf->vars == NULL) {
             return NGX_CONF_ERROR;
         }
@@ -228,7 +228,7 @@ ngx_stream_log_var_set(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     }
 
     if (v->get_handler == NULL) {
-        v->get_handler = ngx_stream_log_var_set_variable;
+        v->get_handler = ngx_stream_log_set_variable;
         v->data = (uintptr_t) lv;
     }
 
@@ -290,7 +290,7 @@ ngx_stream_log_var_set(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
 
 static ngx_int_t
-ngx_stream_log_var_set_variable(ngx_stream_session_t *s,
+ngx_stream_log_set_variable(ngx_stream_session_t *s,
     ngx_stream_variable_value_t *v, uintptr_t data)
 {
     ngx_log_debug0(NGX_LOG_DEBUG_STREAM, s->connection->log, 0,
@@ -303,11 +303,11 @@ ngx_stream_log_var_set_variable(ngx_stream_session_t *s,
 
 
 static void *
-ngx_stream_log_var_set_create_srv_conf(ngx_conf_t *cf)
+ngx_stream_log_set_create_srv_conf(ngx_conf_t *cf)
 {
-    ngx_stream_log_var_set_srv_conf_t *conf;
+    ngx_stream_log_set_srv_conf_t *conf;
 
-    conf = ngx_pcalloc(cf->pool, sizeof(ngx_stream_log_var_set_srv_conf_t));
+    conf = ngx_pcalloc(cf->pool, sizeof(ngx_stream_log_set_srv_conf_t));
     if (conf == NULL) {
         return NULL;
     }
@@ -319,14 +319,14 @@ ngx_stream_log_var_set_create_srv_conf(ngx_conf_t *cf)
 
 
 static char *
-ngx_stream_log_var_set_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
+ngx_stream_log_set_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
 {
-    ngx_stream_log_var_set_srv_conf_t  *prev = parent;
-    ngx_stream_log_var_set_srv_conf_t  *conf = child;
+    ngx_stream_log_set_srv_conf_t  *prev = parent;
+    ngx_stream_log_set_srv_conf_t  *conf = child;
 
-    ngx_stream_log_var_set_variable_t  *pvars, *cvars, *nvar;
-    ngx_uint_t                          i, j, found;
-    ngx_uint_t                          cvars_nelts;
+    ngx_stream_log_set_variable_t  *pvars, *cvars, *nvar;
+    ngx_uint_t                      i, j, found;
+    ngx_uint_t                      cvars_nelts;
 
     if (conf->vars == NGX_CONF_UNSET_PTR) {
         conf->vars = (prev->vars == NGX_CONF_UNSET_PTR) ? NULL : prev->vars;
@@ -365,7 +365,7 @@ ngx_stream_log_var_set_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
 
 
 static ngx_int_t
-ngx_stream_log_var_set_init(ngx_conf_t *cf)
+ngx_stream_log_set_init(ngx_conf_t *cf)
 {
     ngx_stream_handler_pt        *h;
     ngx_stream_core_main_conf_t  *cmcf;
@@ -386,7 +386,7 @@ ngx_stream_log_var_set_init(ngx_conf_t *cf)
                     (arr->nelts - 1) * sizeof(ngx_stream_handler_pt));
     }
 
-    *h = ngx_stream_log_var_set_handler;
+    *h = ngx_stream_log_set_handler;
 
     return NGX_OK;
 }

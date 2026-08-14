@@ -1,13 +1,13 @@
-ngx_addon_name=ngx_stream_log_var_set_module
+ngx_addon_name=ngx_stream_log_set_module
 
 if [ $ngx_module_link = DYNAMIC ]; then
     ngx_module_type=STREAM
-    ngx_module_name=ngx_stream_log_var_set_module
-    ngx_module_srcs="$ngx_addon_dir/ngx_stream_log_var_set_module.c"
+    ngx_module_name=ngx_stream_log_set_module
+    ngx_module_srcs="$ngx_addon_dir/ngx_stream_log_set_module.c"
 
     . auto/module
 else
-    STREAM_MODULES="$STREAM_MODULES ngx_stream_log_var_set_module"
-    NGX_ADDON_SRCS="$NGX_ADDON_SRCS $ngx_addon_dir/ngx_stream_log_var_set_module.c"
+    STREAM_MODULES="$STREAM_MODULES ngx_stream_log_set_module"
+    NGX_ADDON_SRCS="$NGX_ADDON_SRCS $ngx_addon_dir/ngx_stream_log_set_module.c"
 fi
 
