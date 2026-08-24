@@ -93,6 +93,8 @@ static ngx_int_t
 ngx_stream_log_set_handler(ngx_stream_session_t *s)
 {
     ngx_str_t                            val;
+    ngx_int_t                           *set;
+    ngx_uint_t                           i, nset;
     ngx_stream_variable_t               *v;
     ngx_stream_variable_value_t         *vv;
     ngx_stream_log_set_srv_conf_t       *lscf;
@@ -113,8 +115,26 @@ ngx_stream_log_set_handler(ngx_stream_session_t *s)
 
     lv = lscf->vars->elts;
     last = lv + lscf->vars->nelts;
+    nset = 0;
+
+    set = ngx_pnalloc(s->connection->pool,
+                      lscf->vars->nelts * sizeof(ngx_int_t));
+    if (set == NULL) {
+        return NGX_ERROR;
+    }
 
     while (lv < last) {
+
+        for (i = 0; i < nset; i++) {
+            if (set[i] == lv->index) {
+                break;
+            }
+        }
+
+        if (i != nset) {
+            lv++;
+            continue;
+        }
 
 #if (NGX_CONDITION)
         if (ngx_stream_condition_get_expr_result(s, lv->expr_id)
@@ -171,6 +191,8 @@ ngx_stream_log_set_handler(ngx_stream_session_t *s)
             lv->set_handler(s, vv, v[lv->index].data);
         }
 
+        set[nset++] = lv->index;
+
         lv++;
     }
 
@@ -186,7 +208,9 @@ ngx_stream_log_set(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     ngx_str_t                           *value;
     ngx_stream_variable_t               *v;
     ngx_stream_log_set_variable_t       *lv;
+#if !(NGX_CONDITION)
     ngx_str_t                            s;
+#endif
     ngx_stream_compile_complex_value_t   ccv;
 
     value = cf->args->elts;
