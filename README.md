@@ -31,7 +31,7 @@ access_log /spool/logs/nginx-access.log;
 server {
     listen 127.0.0.1:12380;
     log_set $log_field1 $proxy_protocol_tlv_alpn;
-    condition has_ssl_version is_not_empty $proxy_protocol_tlv_ssl_version;
+    expr has_ssl_version !is_empty $proxy_protocol_tlv_ssl_version;
     when has_ssl_version {
         log_set $log_field2 $proxy_protocol_tlv_ssl_version;
     }
@@ -43,11 +43,11 @@ server {
 
 To use theses modules, configure your nginx branch with `--add-module=/path/to/ngx_stream_log_set_module`.
 
-To enable named conditions, build `ngx_condition_module` and this module statically in the same nginx configuration.
+To enable named conditions, build `ngx_expr_module` and this module statically in the same nginx configuration.
 
 # Conditional syntax
 
-Conditional syntax is selected at compile time. With `ngx_condition_module`, place `log_set` inside a `stream` or `server` `when` block; `if=` and `if!=` are rejected. Without it, `when` is unavailable and legacy `if=`/`if!=` remain supported. A rule whose condition does not match is skipped so the next definition of the same variable can be evaluated.
+Conditional syntax is selected at compile time. With `ngx_expr_module`, place `log_set` inside a `stream` or `server` `when` block; `if=` and `if!=` are rejected. Without it, `when` is unavailable and legacy `if=`/`if!=` remain supported. A rule whose condition does not match is skipped so the next definition of the same variable can be evaluated.
 
 # Directives
 

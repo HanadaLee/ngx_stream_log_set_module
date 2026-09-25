@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# Tests for ngx_stream_log_set_module with ngx_condition_module.
+# Tests for ngx_stream_log_set_module with ngx_expr_module.
 
 ###############################################################################
 
@@ -20,7 +20,7 @@ use Test::Nginx::Stream qw/ stream /;
 select STDERR; $| = 1;
 select STDOUT; $| = 1;
 
-my $t = Test::Nginx->new()->has(qw/stream stream_return ngx_condition_module
+my $t = Test::Nginx->new()->has(qw/stream stream_return ngx_expr_module
 	ngx_stream_log_set_module/)->plan(10);
 
 $t->write_file_expand('nginx.conf', <<'EOF');
@@ -50,7 +50,7 @@ stream {
         listen      127.0.0.1:8081;
         access_log  %%TESTDIR%%/values.log values;
 
-        condition special bool true;
+        expr special bool true;
 
         when special {
             log_set $field special-$status;
@@ -64,7 +64,7 @@ stream {
         listen      127.0.0.1:8082;
         access_log  %%TESTDIR%%/values.log values;
 
-        condition special bool false;
+        expr special bool false;
 
         when special {
             log_set $field special-$status;

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# Tests for legacy log_set filters without ngx_condition_module.
+# Tests for legacy log_set filters without ngx_expr_module.
 
 ###############################################################################
 

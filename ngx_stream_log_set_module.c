@@ -8,8 +8,8 @@
 #include <ngx_core.h>
 #include <ngx_stream.h>
 
-#if (NGX_CONDITION)
-#include <ngx_stream_condition_module.h>
+#if (NGX_EXPR)
+#include <ngx_stream_expr_module.h>
 #endif
 
 
@@ -17,8 +17,8 @@ typedef struct {
     ngx_int_t                    index;
     ngx_stream_complex_value_t   value;
     ngx_stream_set_variable_pt   set_handler;
-#if (NGX_CONDITION)
-    ngx_condition_expr_id_t      expr_id;
+#if (NGX_EXPR)
+    ngx_expr_when_id_t           expr_id;
 #else
     ngx_stream_complex_value_t  *filter;
     ngx_int_t                    negative;
@@ -46,7 +46,7 @@ static ngx_command_t  ngx_stream_log_set_commands[] = {
 
     { ngx_string("log_set"),
       NGX_STREAM_MAIN_CONF|NGX_STREAM_SRV_CONF
-#if (NGX_CONDITION)
+#if (NGX_EXPR)
                            |NGX_STREAM_MAIN_WHEN_CONF
                            |NGX_STREAM_SRV_WHEN_CONF|NGX_CONF_TAKE2,
 #else
@@ -136,9 +136,8 @@ ngx_stream_log_set_handler(ngx_stream_session_t *s)
             continue;
         }
 
-#if (NGX_CONDITION)
-        if (ngx_stream_condition_get_expr_result(s, lv->expr_id)
-            != NGX_CONDITION_EXPR_HIT)
+#if (NGX_EXPR)
+        if (ngx_stream_expr_get_result(s, lv->expr_id) != NGX_EXPR_WHEN_HIT)
         {
             lv++;
             continue;
@@ -208,7 +207,7 @@ ngx_stream_log_set(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     ngx_str_t                           *value;
     ngx_stream_variable_t               *v;
     ngx_stream_log_set_variable_t       *lv;
-#if !(NGX_CONDITION)
+#if !(NGX_EXPR)
     ngx_str_t                            s;
 #endif
     ngx_stream_compile_complex_value_t   ccv;
@@ -237,8 +236,8 @@ ngx_stream_log_set(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         return NGX_CONF_ERROR;
     }
 
-#if (NGX_CONDITION)
-    lv->expr_id = ngx_condition_get_associated_expr_id(cf);
+#if (NGX_EXPR)
+    lv->expr_id = ngx_expr_get_associated_when_id(cf);
 #endif
 
     v = ngx_stream_add_variable(cf, &value[1], NGX_STREAM_VAR_CHANGEABLE);
@@ -268,7 +267,7 @@ ngx_stream_log_set(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         return NGX_CONF_ERROR;
     }
 
-#if !(NGX_CONDITION)
+#if !(NGX_EXPR)
     if (cf->args->nelts == 4) {
 
         if (ngx_strncmp(value[3].data, "if=", 3) == 0) {
