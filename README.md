@@ -59,7 +59,12 @@ Conditional syntax is selected at compile time. With `ngx_expr_module`, place `l
 
 **Context:** *stream, server, when*
 
-Sets the variable to the given value before access log writing. The value may contain variables. These directives are inherited from the previous configuration level only when there is no directive for the same variable defined at the current level.
+Sets the variable to the given value before access log writing. The value may contain variables.
+
+For each variable, local definitions are evaluated first in configuration order.
+If no local condition matches, definitions inherited from the previous level
+are evaluated. An unconditional local definition replaces inherited definitions
+for the same variable. The first matching definition supplies the value.
 
 # Author
 

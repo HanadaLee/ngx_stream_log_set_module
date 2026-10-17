@@ -21,7 +21,7 @@ select STDERR; $| = 1;
 select STDOUT; $| = 1;
 
 my $t = Test::Nginx->new()->has(qw/stream stream_return ngx_expr_module
-	ngx_stream_log_set_module/)->plan(10);
+	ngx_stream_log_set_module/)->plan(14);
 
 $t->write_file_expand('nginx.conf', <<'EOF');
 
@@ -87,6 +87,22 @@ stream {
         log_set     $field $protocol:$status:$bytes_sent;
         return      response;
     }
+
+    server {
+        listen      127.0.0.1:8085;
+        access_log  %%TESTDIR%%/values.log values;
+        expr special bool true;
+        when special { log_set $field child; }
+        return hit;
+    }
+
+    server {
+        listen      127.0.0.1:8086;
+        access_log  %%TESTDIR%%/values.log values;
+        expr special bool false;
+        when special { log_set $field child; }
+        return miss;
+    }
 }
 
 EOF
@@ -100,6 +116,10 @@ is(response(8081), 'first', 'conditional hit session');
 is(response(8082), 'second', 'conditional miss session');
 is(response(8083), 'override', 'local override session');
 is(response(8084), 'response', 'response variable session');
+is(response(8085), 'hit', 'conditional child hit session');
+is(response(8086), 'miss', 'conditional child miss session');
+
+$t->stop();
 
 my $log = $t->read_file('values.log');
 
@@ -113,6 +133,10 @@ like($log, line(8083, 'local', 'parent'),
 	'local definition replaces parent for the same variable');
 like($log, qr/^\Q@{[port(8084)]}\E\|TCP:200:\d+\|parent$/m,
 	'log phase can use final session variables');
+like($log, line(8085, 'child', 'parent'),
+	'conditional child overrides inherited assignment on hit');
+like($log, line(8086, 'parent-200', 'parent'),
+	'conditional child retains inherited assignment on miss');
 
 ###############################################################################
 

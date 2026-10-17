@@ -367,10 +367,22 @@ ngx_stream_log_set_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
         found = 0;
 
         for (j = 0; j < cvars_nelts; j++) {
-            if (cvars[j].index == pvars[i].index) {
-                found = 1;
-                break;
+            if (cvars[j].index != pvars[i].index) {
+                continue;
             }
+
+#if (NGX_EXPR)
+            if (cvars[j].expr_id != NGX_EXPR_NO_WHEN_ID) {
+                continue;
+            }
+#else
+            if (cvars[j].filter != NULL) {
+                continue;
+            }
+#endif
+
+            found = 1;
+            break;
         }
 
         if (!found) {
